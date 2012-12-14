@@ -1,0 +1,153 @@
+\documentclass{beamer}
+%\documentclass[handout]{beamer}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{color}
+%\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{listings}
+
+\lstset{%
+  language=C++,
+  basicstyle=\scriptsize\ttfamily
+}
+
+\usetheme{Boadilla}
+\usefonttheme{professionalfonts}
+\useoutertheme[subsection=false,footline=empty]{miniframes}
+\useinnertheme{circles}
+\setbeamertemplate{footline}[frame number]
+
+\author{Roland Hieber}
+\title{Copy-on-write und Implicit Sharing in Qt}
+\institute{Stratum~0~e.~V.}
+\date{14.~Dezember~2012}
+
+\begin{document}
+\begin{frame}
+  \titlepage
+  \thispagestyle{empty}
+\end{frame}
+
+\section{Motivation}
+\begin{frame}{Motivation}
+  \lstinputlisting{motivation.cpp}
+\end{frame}
+\begin{frame}{Motivation}
+  \lstinputlisting[basicstyle=\tiny\ttfamily]{motivation.cpp}
+  \begin{itemize}
+    \item jedes erstellte \texttt{Node}-Objekt braucht Speicher
+    \begin{itemize}
+      \item obwohl der Inhalt identisch ist
+    \end{itemize}
+    \item Lösungsmöglichkeiten: (Shared) Pointer, Copy-on-write
+  \end{itemize}
+\end{frame}
+
+\section{Copy-on-write}
+\begin{frame}{Copy-on-write}
+  Methodik:
+  \begin{itemize}
+    \item Kopien teilen sich vorerst einen Speicherbereich 
+      \emph{(shallow copy)}
+    \item Kopien werden erst wirklich kopiert, wenn sie geändert werden
+      \emph{(deep copy)}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Copy-on-write}
+  Objekt kopieren:
+    \begin{itemize}
+      \item vorerst auf Speicherbereich des alten Objekts verweisen
+      \item gemeinsamen Referenzzähler inkrementieren
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Copy-on-write}
+  Objekt ändern:
+    \begin{itemize}
+      \item Falls Referenzzähler gleich 1:
+        \begin{itemize}
+          \item \emph{nur ein Objekt referenziert gemeinsamen Speicher}
+          \item Änderungen wie gewohnt vornehmen
+        \end{itemize}
+      \item Falls Referenzzähler größer als 1:
+        \begin{itemize}
+          \item \emph{mehr als ein Objekt referenziert gemeinsamen Speicher}
+          \item alten Referenzzähler dekrementieren
+          \item neuen Speicher reservieren
+          \item alten Speicherbereich kopieren
+          \item neuen Referenzzähler auf 1 setzen
+          \item Änderungen wie gewohnt in neuem Speicherbereich vornehmen
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Copy-on-write}
+  Objekt löschen:
+    \begin{itemize}
+      \item gemeinsamen Referenzzähler dekrementieren
+      \item Falls Referenzzähler 0:
+        \begin{itemize}
+          \item \emph{kein Objekt referenziert mehr den gemeinsamen Speicher}
+          \item Speicherbereich freigeben
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\section{Umsetzung in Q}
+\begin{frame}{Umsetzung in Qt}
+  Implementierung als Flyweight Pattern:
+  \begin{itemize}
+    \item \texttt{NodeData} speichert nur Daten
+      \begin{itemize}
+        \item abgeleitet von \texttt{QSharedData}
+        \item threadsichere Referenzzählung
+      \end{itemize}
+    \pause
+    \item \texttt{Node} als Wrapper für Zugriff von außen
+      \begin{itemize}
+        \item enthält Member vom Typ \texttt{QSharedDataPointer<NodeData>}
+          \begin{itemize}
+            \item Shared Pointer auf QSharedData-Objekte
+            \item \texttt{detach()} erstellt deep copies
+            \item Überladung von \texttt{operator->()}
+              ruft bei Schreibzugriff \texttt{detach()} auf
+          \end{itemize}
+        \item Copy-Konstruktor kopiert nur Referenz auf
+          \texttt{QSharedDataPointer<NodeData>}!
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Beispiel}
+  nodedata.h
+  \lstinputlisting{nodedata.h}
+\end{frame}
+
+\begin{frame}{Beispiel}
+  node.cpp
+  \lstinputlisting{node.cpp}
+\end{frame}
+
+\section{Quellen}
+\begin{frame}
+  \centering
+  \vfill
+  Vielen Dank für die Aufmerksamkeit!
+  \vfill
+  {\footnotesize Diese Vortragsfolien sind lizenziert unter CC-BY-SA 3.0.}
+  \vfill
+  \begin{thebibliography}{9}
+    \bibitem{qt-ic}{Qt Documentation: Implicit Sharing.
+      \url{https://qt-project.org/doc/qt-4.8/implicit-sharing.html}}
+    \bibitem{qt-qsd}{Qt Documentation: QSharedData.
+      \url{https://qt-project.org/doc/qt-4.8/qshareddata.html}}
+    \bibitem{qt-qsdp}{Qt Documentation: QSharedDataPointer.
+      \url{https://qt-project.org/doc/qt-4.8/qshareddatapointer.html}}
+    \bibitem{wiki}{Wikipedia: \emph{Flyweight Pattern}.
+      \url{https://en.wikipedia.org/w/index.php?oldid=526237500}}
+  \end{thebibliography}
+\end{frame}
+\end{document}
+% vim: set sw=2 ts=2 expandtab :
