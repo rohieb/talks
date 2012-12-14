@@ -10,8 +10,8 @@ public:
 	double lon() { return lon_; }
 };
 
-void doSomething(Node n) { /* ... */ }
+Node doSomething(Node n) { /* ... */ return n; }
+
 void main(int argc, char ** argv) {
-	Node n(52.2785658, 10.211247);
-	doSomething(n);
+	Node n = doSomething(Node(52.2785658, 10.211247));
 }
