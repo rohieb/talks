@@ -1,0 +1,26 @@
+OpenStreetMap - was ist das und wie funktioniert es
+
+- Vorkenntnisse?
+
+- Idee, Lizenz
+  * freie Weltkarte
+  * “Distributed Intelligence”
+  * CC-BY-SA, bald ODbL
+
+- Beitragen:
+  * Software:
+    · Potlatch
+    · Merkaartor
+    · JOSM
+
+  * Abzeichnen von Luftbildern (Bing/Yahoo)
+    · http://mapbox.com/blog/tracing-openstreetmap-sahel/
+
+  * GPS-Tracks
+
+- Technik im Hintergrund
+  * Slippy Map
+  * Mapnik + PostgreSQL + PostGIS
+    · :sp osm-mapnik-style.xml
+
+- Fragen?
