@@ -6,7 +6,10 @@
 
 \lstset{%
   language=C,
-  basicstyle=\ttfamily
+  basicstyle=\ttfamily,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
 }
 
 \usetheme{Boadilla}
@@ -17,7 +20,7 @@
 
 \author{Roland Hieber}
 \title{Teensy Tiny ELF Programs}
-\subtitle{inspired by Brian Raiter \\}
+\subtitle{inspired by Brian Raiter}
 \institute{Stratum~0~e.\,V.}
 \date{March~15, 2013}
 
@@ -27,18 +30,48 @@
 \end{frame}
 
 
-\begin{frame}{Hello World}
-\lstinputlisting{hello.c}
+\begin{frame}[fragile]{Hello World}
+\begin{lstlisting}
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+	printf("Hello World!\n");
+	return 42;
+}
+\end{lstlisting}
+Well, how big can it be?
 \pause
+
+\begin{lstlisting}
+$ gcc hello.c
+$ wc -c a.out
+4483 a.out
+\end{lstlisting}
+
+Oops.
+\end{frame}
+
+\begin{frame}[fragile]{Hello World}
 \begin{itemize}
-	\item Okay. Maybe don't print anything.
+	\item Okay. Maybe don't print anything, just return a value.
+	\begin{lstlisting}
+		$ echo 'main(){return 42;}' | gcc -x c -
+		$ wc -c a.out
+		4359 a.out
+	\end{lstlisting}
 	\pause
-	\item Oh okay, strip the executable.
+	\item Oh okay, we forgot to optimize for size and strip the executable.
+	\begin{lstlisting}
+		$ echo 'main(){return 42;}' | gcc -x c -s -Os -
+		$ wc -c a.out
+		2756 a.out
+	\end{lstlisting}
+	\pause
+	\item Minimal C program has still 2{.}7~KB. Meh.
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]
-\frametitle{Next step: Assembler}
+\begin{frame}[fragile]{Next step: Assembler}
 \begin{lstlisting}
 	; tiny.asm
 	BITS 32
@@ -59,8 +92,7 @@ $ wc -c a.out
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]
-\frametitle{Deeper into the Rabbit Hole: libc}
+\begin{frame}[fragile]{Deeper into the Rabbit Hole: libc}
 \begin{lstlisting}
 	; tiny.asm
 	BITS 32
@@ -91,7 +123,7 @@ GLOBAL _start
 SECTION .text
 _start:
   mov     eax, 1  ; "exit" syscall, see unistd.h
-  mov     ebx, 42  
+  mov     ebx, 42
   int     0x80
 \end{lstlisting}
 \pause
@@ -119,20 +151,24 @@ $ objdump -x a.out | less
 [...]
 
 $ hexdump a.out
+[...]
 00000080: 31C0 40B3 2ACD 8000 5468 6520 4E65 7477  1.@.*...The Netw
 00000090: 6964 6520 4173 7365 6D62 6C65 7220 302E  ide Assembler 0.
 000000A0: 3938 0000 2E73 796D 7461 6200 2E73 7472  98...symtab..str
+[...]
 \end{lstlisting}
+NASM, that bitch.
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Hmm. Let's write ELF directly.}
+\frametitle{Time for some black magic: let's write ELF directly.}
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+; tiny.asm
 BITS 32
        org  0x08048000
-ehdr:                               ; Elf32_Ehdr
+ehdr:                               ; Elf32_Ehdr, see <linux/elf.h>
         db  0x7F, "ELF", 1, 1, 1, 0 ;  e_ident
-times 8 db  0
+times 8 db  0                       ;    (padding)
         dw  2                       ;  e_type
         dw  3                       ;  e_machine
         dd  1                       ;  e_version
@@ -151,8 +187,9 @@ ehdrsize  equ  $ - ehdr
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Hmm. Let's write ELF directly.}
+\frametitle{Time for some black magic: let's write ELF directly.}
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+; tiny.asm, cont'd
 phdr:                               ; Elf32_Phdr
         dd  1                       ;  p_type
         dd  0                       ;  p_offset
@@ -165,13 +202,15 @@ phdr:                               ; Elf32_Phdr
 phdrsize  equ $ - phdr
 
 _start:
-; your program here
+  mov     eax, 1  ; "exit" syscall, see unistd.h
+  mov     ebx, 42
+  int     0x80
 filesize      equ     $ - $$
 \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Hmm. Let's write ELF directly.}
+\frametitle{Time for some black magic: let's write ELF directly.}
 \begin{lstlisting}
 $ nasm -f bin -o a.out tiny.asm
 $ chmod +x a.out
@@ -180,20 +219,23 @@ $ ./a.out ; echo $?
 $ wc -c a.out
      91 a.out
 \end{lstlisting}
+91 Bytes, not bad!
+
+But the ELF header still contains to many unused bytes.
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{But\ldots the spec doesn't forbid overlapping headers\ldots}
+\frametitle{Wait\ldots the spec doesn't forbid \emph{overlapping} headers\ldots}
 \begin{lstlisting}[basicstyle=\tiny\ttfamily]
 ; tiny.asm
 BITS 32
          org     0x00200000
          db      0x7F, "ELF"     ; e_ident
          db      1, 1, 1, 0, 0
-_start:  mov     bl, 42
-         xor     eax, eax
-         inc     eax
-         int     0x80
+_start:  mov     bl, 42          ;  (padding)
+         xor     eax, eax        ;  (no wait)
+         inc     eax             ;  (what?)
+         int     0x80            ;  (ohhh, cunning plan!)
          dw      2               ; e_type
          dw      3               ; e_machine
          dd      1               ; e_version
@@ -215,8 +257,9 @@ filesize equ     $ - $$
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{But\ldots the spec doesn't forbid overlapping headers\ldots}
-\ldots some other dirty hacks which probably only work for Linux\ldots
+\frametitle{Wait\ldots the spec doesn't forbid \emph{overlapping} headers\ldots}
+\ldots other dirty hacks like eliminating bytes that are not read by the loader
+anyway\ldots
 \begin{lstlisting}
 $ nasm -f bin -o a.out tiny.asm
 $ chmod +x a.out
@@ -227,16 +270,39 @@ $ wc -c a.out
 \end{lstlisting}
 
 45 bytes for a valid Linux executable?! \textbackslash{}o/
-(okay, ``valid''\ldots probably only works for libc)
+
+(okay, ``valid''\ldots probably only works on Linux, but hey, it works!)
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{So, can we still do better?}
+Unfortunately not.
+
+There is no way to eliminate the last byte at file offset 45, which specifies
+the location of the program header. This byte must be at position 45, and there
+is no way around it.
+
+On the other hand, we started out with 4.3~Kilobyte, and now we have 45~Byte.
+That is quite an achievement.
 \end{frame}
 
 \begin{frame}{Sources}
+\hfill
+\small
 \begin{thebibliography}{9}
 	\bibitem{raiter}{Brian Raiter: A Whirlwind Tutorial on Creating Really Teensy
-		ELF Executables for Linux.
+		ELF Executables for Linux. July 2, 1999.
 		\url{http://www.muppetlabs.com/~breadbox/software/tiny/teensy.html}}
 \end{thebibliography}
-\end{frame}
 
+\hfill
+
+This presentation was carefully copy-pasted from there by hand. No code segments
+were harmed in the making of this presentation.
+
+(And since the original post did not specify a licence, I am probably doomed
+now. Brian may forgive me, but his write-up is just so excellent.)
+\hfill
+\end{frame}
 \end{document}
 
