@@ -1,0 +1,68 @@
+abs.png
+	public domain, from:
+	https://commons.wikimedia.org/wiki/File:Acrylnitril.svg
+	https://commons.wikimedia.org/wiki/File:Buta-1,3-diene.svg
+	https://commons.wikimedia.org/wiki/File:Styrol.svg
+	
+chocolate-printing.jpg
+	unknown, from http://reprap.org/wiki/File:6809163955_41167f14a1_m.jpg
+
+chocolate-white.jpg
+	unknown, from http://reprap.org/wiki/File:6809158023_ed92f3d343_m.jpg
+
+hash-invaders.jpg
+	CC-BY rohieb: https://yfrog.com/kj1vgmgwj
+
+inga-case-1.jpg
+	CC-BY-SA Daniel Willmann, Source: http://www.thingiverse.com/image:132242
+
+inga-case-2.jpg
+	CC-BY-SA Daniel Willmann, Source: http://www.thingiverse.com/image:132242
+
+mario-cube.jpg
+	CC-BY rohieb: http://www.thingiverse.com/image:144329
+
+mate-tags-alle.jpg
+	CC-BY-SA Daniel Willmann, Source: http://www.thingiverse.com/image:139061
+
+mate-tags-flasche.jpg
+	CC-BY-SA Daniel Willmann, Source: http://www.thingiverse.com/image:117110
+
+MV-scaled.jpg
+	CC-BY-SA jh, https://stratum0.org/wiki/Datei:MV-2012-01-08.jpg
+
+n64.jpg
+	unknown, Tweet by @b4ckspace, Source: http://twitpic.com/b7nat1
+	
+Official_gnu.svg
+	Victor Siame <vcopovi@wanadoo.fr>
+	Licence Art Libre (see http://artlibre.org/licence/lal/de)
+	image from https://commons.wikimedia.org/wiki/File:Official_gnu.svg
+
+pla_kunststoff_blau_transparent_0.jpg
+	unknown, Source: https://grrf.de/de/catalog/pla-kunststoff-blau-transparent
+
+pla-wood.jpg
+	Source: https://grrf.de/de/catalog/spezial-material/druckbarer-holzdraht
+
+Polylactides_Formulae_V.1.eps and Polylactides_Formulae_V.1.svg
+	CC-0 (public domain), from
+	https://commons.wikimedia.org/wiki/File:Polylactides_Formulae_V.1.svg
+
+pony.jpg
+	CC-BY-SA DooMMasteR: https://secure.flickr.com/photos/doommeer/8143557116/
+
+pony-with-support.jpg
+	CC-BY-SA DooMMasteR: https://secure.flickr.com/photos/doommeer/8143518431
+
+reprails-1.jpg
+	CC-BY-SA Lena Schimmel: https://stratum0.org/wiki/Datei:RepRails_gedruckt_2.jpg
+
+reprails-2.jpg
+	CC-BY-SA Lena Schimmel: https://stratum0.org/wiki/Datei:RepRails_gedruckt_1.jpg
+
+Reprappro-Mendel-scaled.jpg
+	unknown, Source: http://reprap.org/wiki/File:Reprappro-Mendel.jpg
+
+stativadapter.jpg
+	Wolf-Bastian Poettner, http://yfrog.com/nxtn7cmj
