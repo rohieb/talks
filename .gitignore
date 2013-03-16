@@ -1,6 +1,4 @@
 *.dvi
-*.pdf
-*.ps
 *.snm
 .*.sw*
 *.backup
