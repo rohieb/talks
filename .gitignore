@@ -8,3 +8,5 @@
 *.log
 *.aux
 *.vrb
+*.fdb_latexmk
+*.fls

@@ -1,0 +1,115 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{graphicx} % needed for beamer
+\usepackage[LY1,T1]{fontenc}
+\usepackage[defaultmono,scale=0.9]{droidmono}
+
+\usetheme{Boadilla}
+\useinnertheme{circles}
+\setbeamertemplate{footline}[frame number]
+
+\author{rohieb}
+\title{D-Bus}
+\institute{Stratum~0~e.\,V.}
+\date{May~14, 2015}
+
+\begin{document}
+\begin{frame}[plain]
+	\maketitle
+\end{frame}
+
+\begin{frame}{What is it?}
+	\begin{itemize}
+		\item ``Desktop Bus''
+		\item typed inter-process communication
+			\begin{itemize}
+				\item like pipes/FIFOs, (network\textbar UNIX) sockets, shared memory
+				\item \ldots but with types (like int, string, arrays, dictionaries)
+			\end{itemize}
+		\item used by many many many applications, like:
+			\begin{itemize}
+				\footnotesize
+				\item desktop notifications
+				\item media players
+				\item power management
+				\item udev
+				\item avahi
+				\item systemd
+				\item \ldots
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Features}
+\begin{itemize}
+	\item object-oriented approach
+		\begin{itemize}
+			\item methods, properties, signals, objects (= ``instances'')
+			\item introspection
+		\end{itemize}
+	\item access control
+		\begin{itemize}
+			\item system bus vs. desktop bus
+		\end{itemize}
+	\item service activation
+	\item network transparent
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tools}
+	\begin{itemize}
+		\item command line access: \texttt{dbus-monitor}, \texttt{dbus-send}
+		\item introspection and debugging: d-feet
+		\item bindings for your favourite programming language
+	\end{itemize}
+	\pause
+	\vfill
+	\begin{center}
+		Demo Time!
+	\end{center}
+\end{frame}
+
+\begin{frame}{kdbus}
+	\begin{itemize}
+		\item ``D-Bus in the Linux kernel''
+		\item actively developed, integration into Linux still unsure
+		\pause
+		\item userspace:
+			\begin{itemize}
+				\item high latency
+				\item low throughput $\Rightarrow$ only control, no payload
+				\item each method call: 10 copies, 4 context switches
+				\item not available in early and late boot
+				\item kernel security frameworks need to have userspace interface
+			\end{itemize}
+		\pause
+		\item kdbus:
+			\begin{itemize}
+				\item lower latency
+				\item higher throughput $\Rightarrow$ send GiB of data!
+				\item each method call: $\leq$ 2 copies, 2 context switches
+					\begin{itemize}
+						\item zero-copy if payload $\leq$ 512 kiB
+					\end{itemize}
+				\item available directly after boot
+				\item but: not network transparent
+					\begin{itemize}
+						\item only used locally, use D-Bus for network stuff
+					\end{itemize}
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Sources}
+\hfill
+%\small
+\begin{thebibliography}{9}
+	\bibitem{homepage}{D-Bus Homepage:
+		\url{http://www.freedesktop.org/Software/dbus}}
+	\bibitem{fosdem14}{Lennart Poettering: Anatomy of kdbus, FOSDEM 2014, 
+		\url{https://archive.fosdem.org/2014/schedule/event/anatomy_of_kdbus/}}
+\end{thebibliography}
+\end{frame}
+\end{document}
+
